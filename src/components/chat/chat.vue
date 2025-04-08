@@ -16,7 +16,7 @@
       </div>
   
       <div class="center" ref="chatContainer" @scroll="handleScroll">
-        <template v-if="activeChat">
+        <template v-if="activeChat" >
           <div
             v-for="message in messages"
             :key="message.id"
@@ -184,20 +184,17 @@
   }, { immediate: true });
   
   socket.on("privateMessage", ({ chatId, message, userId }) => {
-  if (chatId === props.chatId) {
-    const isDuplicate = messages.value.some(m =>
-      m.text === message && m.userId === userId
-    );
-
-    if (!isDuplicate) {
-      messages.value.push({
-        id: Date.now(), // fallback id
-        text: message,
-        userId,
-        timestamp: new Date().toISOString(),
-      });
+    console.log({chatId, message, userId});
+    if (userId === currentUserId.value.id) {
+      return;
     }
-  }
+
+    messages.value.push({
+      id: Date.now(), // fallback id
+      text: message,
+      userId,
+      timestamp: new Date().toISOString(),
+    });
 });
 
   
