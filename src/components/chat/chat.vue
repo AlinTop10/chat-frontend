@@ -56,7 +56,8 @@
   import { watch, computed, ref, onMounted, nextTick } from "vue";
   import EmojiPicker from "vue3-emoji-picker";
   import "vue3-emoji-picker/css";
-  import { getAccount, getChatMessages, sendMessageToChat } from "@/services/account";
+  import { getAccount, getChatMessages } from "@/services/account";
+  // sendMessageToChat - nu mai folosesc
   import { io } from 'socket.io-client';
   
   const socket = io("ws://localhost:4000");
@@ -128,28 +129,22 @@
     const userId = currentUserId.value.id;
     const chatId = props.chatId;
   
-    try {
+    
       // Emit către serverul WebSocket
       socket.emit("privateMessage", { message, userId, chatId });
   
-      const response = await sendMessageToChat(chatId, userId, message);
-  
-      const newMessage = {
-        id: response.data.id,
+      messages.value.push({
+        id: Date.now(),
         text: message,
         userId,
-        timestamp: response.data.createdAt || new Date().toISOString(),
-      };
-  
-      messages.value.push(newMessage);
+        timestamp: new Date().toISOString(),
+      });
+
       text.value = "";
   
       nextTick(() => {
         chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
       });
-    } catch (error) {
-      console.error("Eroare la trimiterea mesajului:", error);
-    }
   };
   
   const handleScroll = () => {
@@ -160,7 +155,7 @@
     }
   };
   
-  // ⚠️ Mutăm emit-ul în watch-ul de chatId
+  // Mutăm emit-ul în watch-ul de chatId
   watch(() => props.chatId, (newChatId) => {
     if (newChatId === null) {
       messages.value = [];
@@ -183,19 +178,31 @@
     }
   }, { immediate: true });
   
-  socket.on("privateMessage", ({ chatId, message, userId }) => {
-    console.log({chatId, message, userId});
-    if (userId === currentUserId.value.id) {
-      return;
-    }
+  socket.on("privateMessage", ({ chatId: incomingChatId, message, userId }) => {
+  console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId });
+  console.log("Chat activ:", props.chatId);
 
-    messages.value.push({
-      id: Date.now(), // fallback id
-      text: message,
-      userId,
-      timestamp: new Date().toISOString(),
-    });
+  if (!props.chatId || incomingChatId !== props.chatId) {
+    console.log("Mesajul nu e pentru chatul activ.");
+    return;
+  }
+  // Dacă e de la mine, nu îl mai adaug
+  if (userId === currentUserId.value?.id) {
+    return;
+  }
+
+  messages.value = [...messages.value, {
+    id: Date.now(),
+    text: message,
+    userId,
+    timestamp: new Date().toISOString(),
+  }];
+
+  nextTick(() => {
+    chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
+  });
 });
+
 
   
   const toggleEmojiPicker = () => {

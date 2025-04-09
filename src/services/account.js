@@ -71,14 +71,14 @@ async function getChatMessages(chatId, page = 1) {
     });
 }
 
-async function sendMessageToChat(chatId, userId, message){
-    return getHttpClient().post(`chats/${chatId}/sendMessagesToChat`,
-        {
-            chatId: chatId,
-            userId: userId,
-            message: message
-        });
-} 
+// async function sendMessageToChat(chatId, userId, message){ nu mai folosesc
+//     return getHttpClient().post(`chats/${chatId}/sendMessagesToChat`,
+//         {
+//             chatId: chatId,
+//             userId: userId,
+//             message: message
+//         });
+// } 
 
 async function  acceptFriends(userId, friendId){
     return getHttpClient().get(`users/addFriends/${userId}/${friendId}`);
@@ -98,4 +98,5 @@ async function  addChats(userId, friendId){
 
 
 
-export{login, auth, getAccount,getFriends, getChatMessages, sendMessageToChat, acceptFriends, deliteFriends, getUsers, addChats};
+export{login, auth, getAccount,getFriends, getChatMessages, acceptFriends, deliteFriends, getUsers, addChats};
+// sendMessageToChat
