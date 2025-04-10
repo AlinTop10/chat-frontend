@@ -101,6 +101,32 @@ body{
     }
 }
 
+.chatList {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .chatItemsScroll {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+  
+  .chatItemsScroll::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+
 .chatList::-webkit-scrollbar {
     width: 5px;
 }

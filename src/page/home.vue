@@ -1,43 +1,46 @@
 <template>
-  <div className="container homeContainer">
-         
-          <div className="list">
-              <userInfo/>
-          
-              <div className="chatList">
-                  <div className="search">
-                      <div className="searchBar">
-                          <img src="/src/img/search.png" alt="">
-                          <input type="text" v-model="search" placeholder="Search"/>
-                      </div>
-                      <img :src="showAddUser ? '/src/img/minus.png' : '/src/img/plus.png'" alt="" class="add" @click="toggleAddUser" >
-                  </div>
+  <div class="container homeContainer">
+    <div class="list">
+      <userInfo />
 
-                  <div class="chat-filter">
-                    <button class="active">Toți</button>
-                    <button>Prieteni</button>
-                    <button>Necitite</button>
-                  </div>
-
-                  <div v-for="chat in filteredChats" 
-                      :key="chat.id" 
-                      class="item" 
-                      @click="selectChat(chat.id)">
-                          <img src="/src/img/avatar2.webp" alt="">
-                          <div class="texts">
-                              <span>{{ chat.friend.name }}</span>
-                              <p>{{ modifyTheLastMessage(chat.msg, 7) }}</p>
-                          </div>
-                  </div>
-  
-                  <addUser v-if="showAddUser" />
-              </div>
+      <div class="chatList">
+        <div class="search">
+          <div class="searchBar">
+            <img src="/src/img/search.png" alt="">
+            <input type="text" v-model="search" placeholder="Search" />
           </div>
-          <chat :chatId="chatId" :chats="chats"/>
-          <detail :chatId="chatId" :chats="chats" 
-          @updateChats="updateChats"/>  
+          <img :src="showAddUser ? '/src/img/minus.png' : '/src/img/plus.png'" alt="" class="add" @click="toggleAddUser">
+        </div>
+
+        <div class="chat-filter">
+          <button :class="{ active: activeFilter === 'all' }" @click="setFilter('all')">Toți</button>
+          <button :class="{ active: activeFilter === 'friends' }" @click="setFilter('friends')">Prieteni</button>
+          <button :class="{ active: activeFilter === 'unread' }" @click="setFilter('unread')">Necitite</button>
+        </div>
+
+        <!-- Lista cu scroll -->
+        <div class="chatItemsScroll">
+          <div v-for="chat in filteredChats"
+               :key="chat.id"
+               class="item"
+               @click="selectChat(chat.id)">
+            <img src="/src/img/avatar2.webp" alt="">
+            <div class="texts">
+              <span>{{ chat.friend.name }}</span>
+              <p>{{ modifyTheLastMessage(chat.msg, 7) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <addUser v-if="showAddUser" />
+      </div>
+    </div>
+
+    <chat :chatId="chatId" :chats="chats" />
+    <detail :chatId="chatId" :chats="chats" @updateChats="updateChats" />
   </div>
-  </template>
+</template>
+
 
   <script lang="ts" setup>
   import { ref, onMounted, computed } from "vue";
@@ -51,6 +54,7 @@
   const chats = ref([]);
   const showAddUser = ref(false);
   const search = ref("");
+  const activeFilter = ref("all");
   
   const selectChat = (selectedId: number) => {
     console.log("Chat-ul selectat:", selectedId);
@@ -79,10 +83,23 @@
   }
   
   const filteredChats = computed(() => {
-    return chats.value.filter(chat => 
-      chat.friend.name.toLowerCase().includes(search.value.toLowerCase())
-    );
-  });
+  return chats.value
+    .filter(chat => {
+      const nameMatches = chat.friend.name.toLowerCase().includes(search.value.toLowerCase());
+      
+      if (activeFilter.value === "friends") {
+        return chat.status === 2 && nameMatches;
+      }
+
+      if (activeFilter.value === "unread") {
+        // Înlocuiește cu logica ta de necitite dacă ai flag pentru asta
+        return false;
+      }
+
+      return nameMatches;
+    });
+});
+
 
   const updateChats = async () => {
     try{
@@ -98,6 +115,10 @@
       console.error("Eroare la actualizarea listei de prieteni:", error);
     }
   };
+
+  const setFilter = (filter: string) => {
+    activeFilter.value = filter
+  };
   </script>
   
   
@@ -106,5 +127,6 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
   }
   </style>
