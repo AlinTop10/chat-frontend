@@ -6,17 +6,27 @@
         </div>
         <div className="icons">
             <img src="/src/img/more.png" alt="">
-            <img src="/src/img/edit.png" alt="">
+            <img src="/src/img/edit.png" alt="" @click="toggleOption" />
         </div>
+        <UserOptions v-if="showOptions" @close="showOptions = false" /> 
     </div>
 </template>
     
 <script>
 import { ref, onMounted } from 'vue';
 import { getAccount } from '@/services/account';
+import UserOptions from '../addUser/userOptions.vue';
+
+
 export default{ 
+    components: {UserOptions},
     setup(){
         const user = ref(null);
+        const showOptions = ref(false);
+
+        const toggleOption = () => {
+            showOptions.value = !showOptions.value;
+        }
 
         onMounted(async() => {
             try{
@@ -26,7 +36,7 @@ export default{
                 console.error("Eroare la obținerea datelor userului:", error);
             }
         });
-        return { user };
+        return { user, showOptions, toggleOption };
     }
 }
 </script>

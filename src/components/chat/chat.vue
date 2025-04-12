@@ -73,6 +73,7 @@
     }[];
   }>();
   
+  const emit = defineEmits(['newMessageInAnotherChat']);
   const messages = ref<{ id: number; text: string; userId: number; timestamp: string }[]>([]);
   const open = ref(false);
   const text = ref("");
@@ -183,6 +184,7 @@
   console.log("Chat activ:", props.chatId);
 
   if (!props.chatId || incomingChatId !== props.chatId) {
+    emit("newMessageInAnotherChat", incomingChatId);
     console.log("Mesajul nu e pentru chatul activ.");
     return;
   }
