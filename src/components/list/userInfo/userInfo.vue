@@ -8,7 +8,7 @@
             <img src="/src/img/more.png" alt="">
             <img src="/src/img/edit.png" alt="" @click="toggleOption" />
         </div>
-        <UserOptions v-if="showOptions" @close="showOptions = false" /> 
+        <UserOptions v-if="showOptions"  @nameUpdated="updateUserName" @close="showOptions = false" /> 
     </div>
 </template>
     
@@ -28,6 +28,12 @@ export default{
             showOptions.value = !showOptions.value;
         }
 
+        const updateUserName = (newName) => {
+        if (user.value) {
+            user.value.name = newName;
+        }
+        };
+
         onMounted(async() => {
             try{
                 const response = await  getAccount();
@@ -36,7 +42,7 @@ export default{
                 console.error("Eroare la obținerea datelor userului:", error);
             }
         });
-        return { user, showOptions, toggleOption };
+        return { user, showOptions, toggleOption, updateUserName };
     }
 }
 </script>

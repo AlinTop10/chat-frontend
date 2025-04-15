@@ -97,6 +97,10 @@ async function  addChats(userId, friendId){
 }
 
 
+async function updateAccount(data) {
+    return getHttpClient().post('auth/updateAccount', data)
+  }
 
-export{login, auth, getAccount,getFriends, getChatMessages, acceptFriends, deliteFriends, getUsers, addChats};
+export{login, auth, getAccount,getFriends, getChatMessages, 
+    acceptFriends, deliteFriends, getUsers, addChats, updateAccount};
 // sendMessageToChat

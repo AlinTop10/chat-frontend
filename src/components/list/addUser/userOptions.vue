@@ -16,31 +16,111 @@
     <div class="info-user">
       <label class="label">Numele dumneavoastră</label>
       <div class="input-wrapper">
-        <input class="input" type="text" value="Alin Topalu" />
-        <img class="edit-icon" src="/src/img/edit.png" alt="edit" />
+        <input
+          class="input"
+          type="text"
+          :value="user?.name"
+          :readonly="!isEditingName"
+          ref="nameInputRef"
+        />
+        <img
+          class="edit-icon"
+          :src="isEditingName ? '/src/img/check.png' : '/src/img/edit.png'"
+          alt="edit"
+          @click="onEditNameClick"
+        />
+
       </div>
     </div>
 
-    
     <label class="label tip">Acest nume va fi vizibil pentru persoanele dvs. de contact.</label>
 
     <div class="info-user second">
-      <label class="label">Ifno</label>
+      <label class="label">About</label>
       <div class="input-wrapper">
-        <input class="input" type="text" value="...." />
-        <img class="edit-icon" src="/src/img/edit.png" alt="edit" />
+        <input
+          class="input"
+          type="text"
+          :value="user?.info"
+          :readonly="!isEditingAbout"
+          ref="infoInputRef"
+        />
+        <img
+          class="edit-icon"
+          :src="isEditingAbout ? '/src/img/check.png' : '/src/img/edit.png'"
+          alt="edit"
+          @click="onEditInfoClick"
+        />
+
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default{
-  setup(){
+<script lang="ts" setup> // sa faci sa functioneze si sa poti sa modifici doar una din cele doua elemente: ori nume ori avatar
+import { ref, onMounted, nextTick } from 'vue'
+import { getAccount, updateAccount } from '@/services/account'
 
+const user = ref<{ name: string; info: string } | null>(null)
+
+const isEditingName = ref(false)
+const isEditingAbout = ref(false)
+const newName = ref('');
+const emit = defineEmits(['close','nameUpdated']);
+
+const nameInputRef = ref<HTMLInputElement | null>(null)
+const infoInputRef = ref<HTMLInputElement | null>(null)
+
+onMounted(async () => {
+  try {
+    const response = await getAccount()
+    user.value = {
+      name: response.data.user.name,
+      info: response.data.user.about ?? '...'
+    }
+  } catch (error) {
+    console.log('Eroare la obținerea datelor userului:', error)
+  }
+})
+
+const onEditNameClick = async () => {
+  if (!isEditingName.value) {
+    isEditingName.value = true
+    await nextTick()
+    nameInputRef.value?.focus()
+  } else {
+    const newName = nameInputRef.value?.value ?? ''
+    if (newName !== user.value?.name) {
+      await updateAccount({ name: newName }) // trimite DOAR numele
+      user.value!.name = newName;
+      emit('nameUpdated', newName);
+    }
+    isEditingName.value = false
   }
 }
+
+const saveChanges = () => {
+  emit('nameUpdated', newName.value);
+};
+
+const onEditInfoClick = async () => {
+  if (!isEditingAbout.value) {
+    isEditingAbout.value = true
+    await nextTick()
+    infoInputRef.value?.focus()
+  } else {
+    const newAbout = infoInputRef.value?.value ?? ''
+    if (newAbout !== user.value?.info) {
+      await updateAccount({ about: newAbout }) // trimite DOAR about
+      user.value!.info = newAbout
+    }
+    isEditingAbout.value = false
+  }
+}
+
+
 </script>
+
 
 <style scoped>
 .userOptions {

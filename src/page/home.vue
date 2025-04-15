@@ -129,7 +129,7 @@ const setFilter = (filter: string) => {
 };
 </script>
 
-<style src="@/assets/style.css">
+<style  src="@/assets/style.css">
 .list {
   flex: 1;
   display: flex;

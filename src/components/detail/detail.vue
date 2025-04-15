@@ -3,7 +3,7 @@
         <div className="user">
             <img src="/src/img/avatar2.webp" alt="">
             <h2 v-if="activeChat">{{ activeChat.friend.name }}</h2>
-            <p>...</p>
+            <p v-if="activeChat">{{ activeChat.friend.about }}</p>
         </div>
         <div class="info">
             <div class="option">
@@ -67,6 +67,7 @@ const props = defineProps<{
     friend: {
       id: number;
       name: string;
+      about: string;
     };
   }[];
 }>();

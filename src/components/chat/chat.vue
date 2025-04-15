@@ -5,7 +5,7 @@
           <img src="/src/img/avatar2.webp" alt="">
           <div className="texts">
             <span>{{ activeChat.friend.name }}</span>
-            <p>...</p>
+            <p>{{ activeChat.friend.about }}</p>
           </div>
         </div>
         <div className="icons">
@@ -69,6 +69,7 @@
       friend: {
         id: number;
         name: string;
+        about: string
       };
     }[];
   }>();
@@ -78,7 +79,7 @@
   const open = ref(false);
   const text = ref("");
   const chatContainer = ref<HTMLElement | null>(null);
-  const currentUserId = ref<{ id: number } | null>(null);
+  const currentUserId = ref<{ id: number; } | null>(null);
   const page = ref(1);
   const isLoading = ref(false);
   const hasMoreMessages = ref(true);
