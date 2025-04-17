@@ -180,33 +180,32 @@
     }
   }, { immediate: true });
   
+ 
+
+  socket.on("chatLive", ({ chatId: incomingChatId, message, userId }) => {
+
+  });//aici trebuie sa fac un alt sokett are sa verifice care chat este live si daca nu sa faca updaste la lista din back
+
   socket.on("privateMessage", ({ chatId: incomingChatId, message, userId }) => {
   console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId });
-  console.log("Chat activ:", props.chatId);
+  emit("newMessageInAnotherChat", incomingChatId); // emite oricum, mereu
 
-  if (!props.chatId || incomingChatId !== props.chatId) {
-    emit("newMessageInAnotherChat", incomingChatId);
-    console.log("Mesajul nu e pentru chatul activ.");
-    return;
-  }
-  // Dacă e de la mine, nu îl mai adaug
-  if (userId === currentUserId.value?.id) {
-    return;
-  }
+    if (props.chatId === incomingChatId) {
+      // Dacă e de la mine, nu îl mai adaug
+      if (userId === currentUserId.value?.id) return;
 
-  messages.value = [...messages.value, {
-    id: Date.now(),
-    text: message,
-    userId,
-    timestamp: new Date().toISOString(),
-  }];
+      messages.value = [...messages.value, {
+        id: Date.now(),
+        text: message,
+        userId,
+        timestamp: new Date().toISOString(),
+      }];
 
-  nextTick(() => {
-    chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
+      nextTick(() => {
+        chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
+      });
+    }
   });
-});
-
-
   
   const toggleEmojiPicker = () => {
     open.value = !open.value;

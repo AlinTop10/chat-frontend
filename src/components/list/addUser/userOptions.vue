@@ -36,7 +36,7 @@
     <label class="label tip">Acest nume va fi vizibil pentru persoanele dvs. de contact.</label>
 
     <div class="info-user second">
-      <label class="label">About</label>
+      <label class="label">Despre</label>
       <div class="input-wrapper">
         <input
           class="input"
@@ -57,7 +57,7 @@
   </div>
 </template>
 
-<script lang="ts" setup> // sa faci sa functioneze si sa poti sa modifici doar una din cele doua elemente: ori nume ori avatar
+<script lang="ts" setup> 
 import { ref, onMounted, nextTick } from 'vue'
 import { getAccount, updateAccount } from '@/services/account'
 

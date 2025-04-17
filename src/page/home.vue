@@ -37,7 +37,7 @@
     </div>
 
     <chat :chatId="chatId" :chats="chats" @newMessageInAnotherChat="handleNewEvent" />
-    <detail :chatId="chatId" :chats="chats" @updateChats="updateChats" />
+    <detail :chatId="chatId" :chats="chats" @updateChats="updateChats"/>
   </div>
 </template>
 
@@ -120,9 +120,11 @@ const updateChats = async () => {
 };
 
 // Poți apela asta din `chat.vue` prin emit
-const handleNewEvent = () => {
-  newEventInChat.value = Date.now(); // Forțăm modificare pentru trigger în watch
+const handleNewEvent = (chatId: number) => {
+  console.log("Update primit de la copil pentru chatId:", chatId);
+  newEventInChat.value = Date.now();
 };
+
 
 const setFilter = (filter: string) => {
   activeFilter.value = filter;
