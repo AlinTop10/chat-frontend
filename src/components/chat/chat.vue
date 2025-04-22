@@ -74,7 +74,8 @@
     }[];
   }>();
   
-  const emit = defineEmits(['newMessageInAnotherChat']);
+  const emit = defineEmits(['newMessageInAnotherChat']);//new message in this chat
+  // const emitt =  defineEmits(['newMessageInThisChat'])
   const messages = ref<{ id: number; text: string; userId: number; timestamp: string }[]>([]);
   const open = ref(false);
   const text = ref("");
@@ -143,6 +144,8 @@
       });
 
       text.value = "";
+
+      emit("newMessageInAnotherChat", chatId);
   
       nextTick(() => {
         chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
@@ -183,12 +186,12 @@
  
 
   socket.on("chatLive", ({ chatId: incomingChatId, message, userId }) => {
-
+    emit("newMessageInAnotherChat", incomingChatId);
   });//aici trebuie sa fac un alt sokett are sa verifice care chat este live si daca nu sa faca updaste la lista din back
 
   socket.on("privateMessage", ({ chatId: incomingChatId, message, userId }) => {
   console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId });
-  emit("newMessageInAnotherChat", incomingChatId); // emite oricum, mereu
+  // emite oricum, mereu
 
     if (props.chatId === incomingChatId) {
       // Dacă e de la mine, nu îl mai adaug

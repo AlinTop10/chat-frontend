@@ -54,10 +54,11 @@ const chats = ref([]);
 const showAddUser = ref(false);
 const search = ref("");
 const activeFilter = ref("all");
-const newEventInChat = ref<number>(0); // inițializare
+const curentChatId = ref<number | null>(0);
 
 const selectChat = (selectedId: number) => {
   console.log("Chat-ul selectat:", selectedId);
+  curentChatId.value = selectedId;
   chatId.value = selectedId;
 };
 
@@ -79,9 +80,7 @@ onMounted(async () => {
   await getAndSetFriends();
 });
 
-watch(newEventInChat, async () => {
-  await updateChats();
-});
+
 
 const modifyTheLastMessage = (msg: string, maxNum: number) => {
   if (!msg) return null;
@@ -120,10 +119,14 @@ const updateChats = async () => {
 };
 
 // Poți apela asta din `chat.vue` prin emit
-const handleNewEvent = (chatId: number) => {
-  console.log("Update primit de la copil pentru chatId:", chatId);
-  newEventInChat.value = Date.now();
+const handleNewEvent = async (chatIdToMove: number) => {
+  const index = chats.value.findIndex(chat => chat.id === chatIdToMove);
+  if (index !== -1) {
+    const chat = chats.value.splice(index, 1)[0];
+    chats.value.unshift(chat);
+  }
 };
+
 
 
 const setFilter = (filter: string) => {
