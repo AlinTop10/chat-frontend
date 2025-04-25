@@ -1,47 +1,52 @@
 <template>
-  <div class="container homeContainer">
-    <div class="list">
-      <userInfo />
+  <div :class="[style.homeWrapper, style.homeFont]">
+    <div :class="style.container">
+      <div :class="style.list">
+        <userInfo />
 
-      <div class="chatList">
-        <div class="search">
-          <div class="searchBar">
-            <img src="/src/img/search.png" alt="">
-            <input type="text" v-model="search" placeholder="Search" />
+        <div :class="style.chatList">
+          <div :class="style.search">
+            <div :class="style.searchBar">
+              <img src="/src/img/search.png" alt="">
+              <input type="text" v-model="search" placeholder="Search" />
+            </div>
+            <img :src="showAddUser ? '/src/img/minus.png' : '/src/img/plus.png'" alt="" :class="style.add" @click="toggleAddUser">
           </div>
-          <img :src="showAddUser ? '/src/img/minus.png' : '/src/img/plus.png'" alt="" class="add" @click="toggleAddUser">
-        </div>
 
-        <div class="chat-filter">
-          <button :class="{ active: activeFilter === 'all' }" @click="setFilter('all')">Toți</button>
-          <button :class="{ active: activeFilter === 'friends' }" @click="setFilter('friends')">Prieteni</button>
-          <button :class="{ active: activeFilter === 'unread' }" @click="setFilter('unread')">Necitite</button>
-        </div>
+          <div :class="style['chat-filter']">
+            <button :class="[style.activeButton, { [style.active]: activeFilter === 'all' }]" @click="setFilter('all')">Toți</button>
+            <button :class="[style.activeButton, { [style.active]: activeFilter === 'friends' }]" @click="setFilter('friends')">Prieteni</button>
+            <button :class="[style.activeButton, { [style.active]: activeFilter === 'unread' }]" @click="setFilter('unread')">Necitite</button>
+          </div>
 
-        <!-- Lista cu scroll -->
-        <div class="chatItemsScroll">
-          <div v-for="chat in filteredChats"
-               :key="chat.id"
-               class="item"
-               @click="selectChat(chat.id)">
-            <img src="/src/img/avatar2.webp" alt="">
-            <div class="texts">
-              <span>{{ chat.friend.name }}</span>
-              <p>{{ modifyTheLastMessage(chat.msg, 7) }}</p>
+          <div :class="style.chatItemsScroll">
+            <div
+              v-for="chat in filteredChats"
+              :key="chat.id"
+              :class="style.item"
+              @click="selectChat(chat.id)"
+            >
+              <img src="/src/img/avatar2.webp" alt="">
+              <div :class="style.texts">
+                <span>{{ chat.friend.name }}</span>
+                <p>{{ modifyTheLastMessage(chat.msg, 7) }}</p>
+              </div>
             </div>
           </div>
+
+          <addUser v-if="showAddUser" />
         </div>
-
-        <addUser v-if="showAddUser" />
       </div>
-    </div>
 
-    <chat :chatId="chatId" :chats="chats" @newMessageInAnotherChat="handleNewEvent" />
-    <detail :chatId="chatId" :chats="chats" @updateChats="updateChats"/>
+      <chat :chatId="chatId" :chats="chats" @newMessageInAnotherChat="handleNewEvent" />
+      <detail :chatId="chatId" :chats="chats" @updateChats="updateChats" />
+    </div>
   </div>
 </template>
 
+
 <script lang="ts" setup>
+import style from '@/assets/style.module.css';
 import { ref, onMounted, computed, watch } from "vue";
 import detail from "@/components/detail/detail.vue";
 import chat from "@/components/chat/chat.vue";
@@ -134,7 +139,7 @@ const setFilter = (filter: string) => {
 };
 </script>
 
-<style scoped src="@/assets/style.css">
+<style scoped>
 .list {
   flex: 1;
   display: flex;

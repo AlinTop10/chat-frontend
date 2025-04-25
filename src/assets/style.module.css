@@ -1,18 +1,16 @@
-* {
-   margin: 0;
-   padding: 0;
-   box-sizing: border-box;
-   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; 
+.homeFont {
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
-body{
-    background-image: url("/src/img/font1.webp");
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    color: white
-} 
+.homeWrapper {
+  background-image: url("/src/img/font1.webp");
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
  .container{
     width: 90vw;
