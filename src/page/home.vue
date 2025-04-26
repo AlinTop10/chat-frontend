@@ -7,7 +7,7 @@
         <div :class="style.chatList">
           <div :class="style.search">
             <div :class="style.searchBar">
-              <img src="/src/img/search.png" alt="">
+              <img src="/src/img/search.png" alt=""/>
               <input type="text" v-model="search" placeholder="Search" />
             </div>
             <img :src="showAddUser ? '/src/img/minus.png' : '/src/img/plus.png'" alt="" :class="style.add" @click="toggleAddUser">
@@ -28,7 +28,13 @@
             >
               <img src="/src/img/avatar2.webp" alt="">
               <div :class="style.texts">
-                <span>{{ chat.friend.name }}</span>
+                <div :class="style['chat-info']">
+                  <span>{{ chat.friend.name }}</span>
+                  <!-- Aici este cercul care afișează numărul de mesaje necitite unread-badge-->
+                  <div v-if="chat.unreadMessagesCount > 0" :class="style.unread_badge">
+                    {{ chat.unreadMessagesCount }}
+                  </div>
+                </div>
                 <p>{{ modifyTheLastMessage(chat.msg, 7) }}</p>
               </div>
             </div>
@@ -38,11 +44,13 @@
         </div>
       </div>
 
-      <chat :chatId="chatId" :chats="chats" @newMessageInAnotherChat="handleNewEvent" />
+      <chat :chatId="chatId" :chats="chats" @newMessageInAnotherChat="handleNewEvent"/>
       <detail :chatId="chatId" :chats="chats" @updateChats="updateChats" />
     </div>
   </div>
 </template>
+
+
 
 
 <script lang="ts" setup>
@@ -51,7 +59,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import detail from "@/components/detail/detail.vue";
 import chat from "@/components/chat/chat.vue";
 import addUser from "@/components/list/addUser/addUser.vue";
-import { getFriends } from "@/services/account";
+import { getFriends, markMessagesAsRead } from "@/services/account";
 import userInfo from "@/components/list/userInfo/userInfo.vue";
 
 const chatId = ref<number | null>(123);
@@ -61,10 +69,18 @@ const search = ref("");
 const activeFilter = ref("all");
 const curentChatId = ref<number | null>(0);
 
-const selectChat = (selectedId: number) => {
+const selectChat = async (selectedId: number) => {
   console.log("Chat-ul selectat:", selectedId);
   curentChatId.value = selectedId;
   chatId.value = selectedId;
+
+  const chat = chats.value.find(c => c.id === selectedId);
+  if (chat) {
+    chat.unreadMessagesCount = 0;
+  }
+
+  // 2. Trimite la server să marcheze toate ca citite
+  await markMessagesAsRead(selectedId);
 };
 
 const toggleAddUser = () => {

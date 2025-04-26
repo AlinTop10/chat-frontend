@@ -151,4 +151,28 @@
   .chat-filter button:hover {
     background-color: #989595;
   }
+
+  .chat-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Asigură-te că cercul nu se suprapune */
+    width: 100%;
+  }
   
+  .chat-info span {
+    margin-right: 10px; /* Spațiu între numele chatului și cerc */
+  }
+
+  .unread_badge {
+    width: 28px;
+    height: 28px;
+    background-color: gray;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    margin-left: 10px; /* Asigurăm că cercul nu se suprapune cu numele */
+  }

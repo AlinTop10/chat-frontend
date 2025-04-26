@@ -65,6 +65,10 @@ async function getFriends(){
     return getHttpClient().get('users/chats');
 }
 
+export const markMessagesAsRead = (chatId) => {
+    return getHttpClient().post('users/read-messages', { chatId });
+};
+
 async function getChatMessages(chatId, page = 1) {
     return getHttpClient().get(`chats/${chatId}/messages`, {
         params: { page }
