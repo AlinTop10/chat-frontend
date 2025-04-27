@@ -59,7 +59,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import detail from "@/components/detail/detail.vue";
 import chat from "@/components/chat/chat.vue";
 import addUser from "@/components/list/addUser/addUser.vue";
-import { getFriends, markMessagesAsRead } from "@/services/account";
+import { getAccount, getFriends, markMessagesAsRead } from "@/services/account";
 import userInfo from "@/components/list/userInfo/userInfo.vue";
 
 const chatId = ref<number | null>(123);
@@ -68,6 +68,7 @@ const showAddUser = ref(false);
 const search = ref("");
 const activeFilter = ref("all");
 const curentChatId = ref<number | null>(0);
+const currentUserId = ref<number | null>(0);
 
 const selectChat = async (selectedId: number) => {
   console.log("Chat-ul selectat:", selectedId);
@@ -99,6 +100,8 @@ const getAndSetFriends = async () => {
 
 onMounted(async () => {
   await getAndSetFriends();
+  const response = await getAccount();
+  currentUserId.value = response.data.user.id;
 });
 
 
@@ -117,8 +120,7 @@ const filteredChats = computed(() => {
     }
 
     if (activeFilter.value === "unread") {
-      // Înlocuiește cu logica ta reală pentru mesaje necitite
-      return false;
+      return chat.unreadMessagesCount > 0 && nameMatches;
     }
 
     return nameMatches;
@@ -140,14 +142,21 @@ const updateChats = async () => {
 };
 
 // Poți apela asta din `chat.vue` prin emit
-const handleNewEvent = async (chatIdToMove: number) => {
-  const index = chats.value.findIndex(chat => chat.id === chatIdToMove);
-  if (index !== -1) {
-    const chat = chats.value.splice(index, 1)[0];
-    chats.value.unshift(chat);
+const handleNewEvent = async (chatIdToMove: number, userId: number) => {
+  const chat = chats.value.find(chat => chat.id === chatIdToMove);
+  if (chat) {
+     if (userId !== currentUserId.value) {// trebuie sa fac verificatia asta in back 
+      chat.unreadMessagesCount++; // creștem numărul de mesaje necitite
+     }
+    
+
+    const index = chats.value.findIndex(c => c.id === chatIdToMove);
+    if (index > -1) {
+      const [movedChat] = chats.value.splice(index, 1); // scoatem chatul din listă
+      chats.value.unshift(movedChat); // îl punem primul
+    }
   }
 };
-
 
 
 const setFilter = (filter: string) => {

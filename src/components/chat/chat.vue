@@ -191,24 +191,28 @@
 
   socket.on("privateMessage", ({ chatId: incomingChatId, message, userId }) => {
   console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId });
-  // emite oricum, mereu
+  if (userId === currentUserId.value?.id) {
+    // Dacă mesajul este trimis de mine, nu fac nimic special
+    return;
+  }
 
-    if (props.chatId === incomingChatId) {
-      // Dacă e de la mine, nu îl mai adaug
-      if (userId === currentUserId.value?.id) return;
+  if (props.chatId !== incomingChatId) {
+    // Dacă mesajul e pe alt chat, emit să crească badge-ul
+    emit("newMessageInAnotherChat", incomingChatId, userId);
+  } else {
+    // Dacă sunt deja în chatul activ, adaug mesajul în UI
+    messages.value = [...messages.value, {
+      id: Date.now(),
+      text: message,
+      userId,
+      timestamp: new Date().toISOString(),
+    }];
+    nextTick(() => {
+      chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
+    });
+  }
+});
 
-      messages.value = [...messages.value, {
-        id: Date.now(),
-        text: message,
-        userId,
-        timestamp: new Date().toISOString(),
-      }];
-
-      nextTick(() => {
-        chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
-      });
-    }
-  });
   
   const toggleEmojiPicker = () => {
     open.value = !open.value;

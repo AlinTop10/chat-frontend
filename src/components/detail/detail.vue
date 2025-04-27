@@ -86,7 +86,6 @@ const acceptFriendRequest = async () => {
 
     try{
         const response = await acceptFriends(currentUserId.value, activeChat.value.friend.id);
-        console.log('asdasdas', currentUserId.value);
         
         console.log("Raspunsul:", response.data);
         alert("Prietenie acceptat cu succes!");
