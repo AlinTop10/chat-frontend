@@ -145,7 +145,7 @@
 
       text.value = "";
 
-      emit("newMessageInAnotherChat", chatId);
+      emit("newMessageInAnotherChat", chatId, userId);
   
       nextTick(() => {
         chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
@@ -186,13 +186,14 @@
  
 
   socket.on("chatLive", ({ chatId: incomingChatId, message, userId }) => {
-    emit("newMessageInAnotherChat", incomingChatId);
+    emit("newMessageInAnotherChat", {incomingChatId, userId});
   });
 
   socket.on("privateMessage", ({ chatId: incomingChatId, message, userId }) => {
   console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId });
+
   if (userId === currentUserId.value?.id) {
-    // Dacă mesajul este trimis de mine, nu fac nimic special
+    // Dacă mesajul este trimis de mine
     return;
   }
 

@@ -143,14 +143,14 @@ const updateChats = async () => {
 
 // Poți apela asta din `chat.vue` prin emit
 const handleNewEvent = async (chatIdToMove: number, userId: number) => {
+  console.log('asdf',{chatIdToMove, userId, currentUserId: curentChatId.value});
   const chat = chats.value.find(chat => chat.id === chatIdToMove);
-  if (chat) {
-     if (userId !== currentUserId.value) {// trebuie sa fac verificatia asta in back 
-      chat.unreadMessagesCount++; // creștem numărul de mesaje necitite
-     }
-    
+  if (chat){
+      if(userId !== currentUserId.value){
+        chat.unreadMessagesCount++; // creștem numărul de mesaje necitite
+      } 
 
-    const index = chats.value.findIndex(c => c.id === chatIdToMove);
+      const index = chats.value.findIndex(c => c.id === chatIdToMove);
     if (index > -1) {
       const [movedChat] = chats.value.splice(index, 1); // scoatem chatul din listă
       chats.value.unshift(movedChat); // îl punem primul
