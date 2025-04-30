@@ -16,7 +16,9 @@
           <div :class="style['chat-filter']">
             <button :class="[style.activeButton, { [style.active]: activeFilter === 'all' }]" @click="setFilter('all')">Toți</button>
             <button :class="[style.activeButton, { [style.active]: activeFilter === 'friends' }]" @click="setFilter('friends')">Prieteni</button>
-            <button :class="[style.activeButton, { [style.active]: activeFilter === 'unread' }]" @click="setFilter('unread')">Necitite</button>
+            <button :class="[style.activeButton, { [style.active]: activeFilter === 'unread' }]" @click="setFilter('unread')">Necitite <span v-if="unreadChatsCount > 0">({{ unreadChatsCount }})</span></button>
+
+
           </div>
 
           <div :class="style.chatItemsScroll">
@@ -69,20 +71,34 @@ const search = ref("");
 const activeFilter = ref("all");
 const curentChatId = ref<number | null>(0);
 const currentUserId = ref<number | null>(0);
+const unreadChatsCount  = ref(0);
+const forceShowChatId = ref<number | null>(null);
+
 
 const selectChat = async (selectedId: number) => {
-  console.log("Chat-ul selectat:", selectedId);
+  const previousForceChatId = forceShowChatId.value;
+
   curentChatId.value = selectedId;
   chatId.value = selectedId;
 
+  forceShowChatId.value = selectedId; // o actualizăm cu noul chat
+
   const chat = chats.value.find(c => c.id === selectedId);
   if (chat) {
+    if (chat.unreadMessagesCount > 0) {
+      unreadChatsCount.value--;
+    }
     chat.unreadMessagesCount = 0;
   }
 
-  // 2. Trimite la server să marcheze toate ca citite
   await markMessagesAsRead(selectedId);
+
+  // ✅ dacă s-a selectat un alt chat decât cel păstrat în necitite, îl eliminăm
+  if (previousForceChatId !== null && selectedId !== previousForceChatId) {
+    forceShowChatId.value = null;
+  }
 };
+
 
 const toggleAddUser = () => {
   showAddUser.value = !showAddUser.value;
@@ -93,6 +109,7 @@ const getAndSetFriends = async () => {
     const response = await getFriends();
     console.log("Chaturile:", response.data);
     chats.value = response.data.chats;
+    unreadChatsCount.value = response.data.unreadChatsCount; 
   } catch (error) {
     console.error("Eroare la obținerea listei de prieteni:", error);
   }
@@ -120,12 +137,14 @@ const filteredChats = computed(() => {
     }
 
     if (activeFilter.value === "unread") {
-      return chat.unreadMessagesCount > 0 && nameMatches;
+      return (chat.unreadMessagesCount > 0 || chat.id === forceShowChatId.value);
     }
 
     return nameMatches;
   });
 });
+
+
 
 const updateChats = async () => {
   try {
@@ -142,21 +161,28 @@ const updateChats = async () => {
 };
 
 // Poți apela asta din `chat.vue` prin emit
-const handleNewEvent = async (chatIdToMove: number, userId: number) => {
-  console.log('asdf',{chatIdToMove, userId, currentUserId: curentChatId.value});
-  const chat = chats.value.find(chat => chat.id === chatIdToMove);
-  if (chat){
-      if(userId !== currentUserId.value){
-        chat.unreadMessagesCount++; // creștem numărul de mesaje necitite
-      } 
+const handleNewEvent = async ({ incomingChatId, userId }: { incomingChatId: number, userId: number }) => {
+  const index = chats.value.findIndex(chat => chat.id === incomingChatId);
+  if (index > -1) {
+    const chat = chats.value[index];
 
-      const index = chats.value.findIndex(c => c.id === chatIdToMove);
-    if (index > -1) {
-      const [movedChat] = chats.value.splice(index, 1); // scoatem chatul din listă
-      chats.value.unshift(movedChat); // îl punem primul
+    const isFromOtherUser = userId !== currentUserId.value;
+    const isNotInCurrentChat = chatId.value !== incomingChatId;
+
+    if (isFromOtherUser && isNotInCurrentChat) {
+      if (chat.unreadMessagesCount === 0) {
+        unreadChatsCount.value++;
+      }
+      chat.unreadMessagesCount++;
     }
+
+    const [movedChat] = chats.value.splice(index, 1);
+    chats.value.unshift(movedChat);
+    chats.value = [...chats.value];
   }
 };
+
+
 
 
 const setFilter = (filter: string) => {

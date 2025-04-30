@@ -56,7 +56,7 @@
   import { watch, computed, ref, onMounted, nextTick } from "vue";
   import EmojiPicker from "vue3-emoji-picker";
   import "vue3-emoji-picker/css";
-  import { getAccount, getChatMessages } from "@/services/account";
+  import { getAccount, getChatMessages, markMessagesAsRead } from "@/services/account";
   // sendMessageToChat - nu mai folosesc
   import { io } from 'socket.io-client';
   
@@ -189,30 +189,37 @@
     emit("newMessageInAnotherChat", {incomingChatId, userId});
   });
 
-  socket.on("privateMessage", ({ chatId: incomingChatId, message, userId }) => {
+  socket.on("privateMessage", async ({ chatId: incomingChatId, message, userId }) => {
   console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId });
 
   if (userId === currentUserId.value?.id) {
-    // Dacă mesajul este trimis de mine
+    
     return;
   }
+  const isCurrentChat = props.chatId === incomingChatId;
 
-  if (props.chatId !== incomingChatId) {
-    // Dacă mesajul e pe alt chat, emit să crească badge-ul
+  if (!isCurrentChat) {
     emit("newMessageInAnotherChat", incomingChatId, userId);
   } else {
-    // Dacă sunt deja în chatul activ, adaug mesajul în UI
-    messages.value = [...messages.value, {
+    messages.value.push({
       id: Date.now(),
       text: message,
       userId,
       timestamp: new Date().toISOString(),
-    }];
+    });
+
     nextTick(() => {
       chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
     });
+
+    try {
+      await markMessagesAsRead(incomingChatId);
+    } catch (err) {
+      console.error("Eroare la marcare ca citit:", err);
+    }
   }
 });
+
 
   
   const toggleEmojiPicker = () => {
