@@ -9,8 +9,10 @@
       <h2 class="title">Profil</h2>
     </div>
 
-    <div class="image">
-      <img src="/src/img/avatar2.webp" alt="">
+    <div class="image" @click="openFileInput">
+      <!-- Afișează avatarul sau imaginea implicită -->
+      <img :src="user?.avatar ? `http://localhost:4000/downloads/${user.avatar}` : '/src/img/avatar2.webp'" alt="Avatar" />
+      <input ref="fileInput" type="file" accept="image/*" @change="handleAvatarChange" class="upload-avatar" style="display:none" />
     </div>
 
     <div class="info-user">
@@ -51,22 +53,22 @@
           alt="edit"
           @click="onEditInfoClick"
         />
-
+        
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup> 
-import { ref, onMounted, nextTick } from 'vue'
-import { getAccount, updateAccount } from '@/services/account'
+import { ref, onMounted, nextTick, defineEmits } from 'vue'
+import { getAccount, updateAccount, uploadAvatar } from '@/services/account'
 
-const user = ref<{ name: string; info: string } | null>(null)
+const user = ref<{ name: string; info: string, avatar: string } | null>(null)
 
 const isEditingName = ref(false)
 const isEditingAbout = ref(false)
 const newName = ref('');
-const emit = defineEmits(['close','nameUpdated']);
+const emit = defineEmits(['close','nameUpdated', 'avatarUpdated']);
 
 const nameInputRef = ref<HTMLInputElement | null>(null)
 const infoInputRef = ref<HTMLInputElement | null>(null)
@@ -74,10 +76,7 @@ const infoInputRef = ref<HTMLInputElement | null>(null)
 onMounted(async () => {
   try {
     const response = await getAccount()
-    user.value = {
-      name: response.data.user.name,
-      info: response.data.user.about ?? '...'
-    }
+    user.value = response.data.user;
   } catch (error) {
     console.log('Eroare la obținerea datelor userului:', error)
   }
@@ -118,11 +117,47 @@ const onEditInfoClick = async () => {
   }
 }
 
+const openFileInput = () => {
+  const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+  fileInput?.click(); // deschide dialogul de selectare fișier
+}
 
+const handleAvatarChange = async (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  console.log(file);
+  if (!file) {
+    console.log("Nu a fost selectat niciun fișier.");
+    return;
+  }
+
+  await uploadAvatar(file);
+
+  emit('avatarUpdated', file.name);
+};
 </script>
 
 
+
 <style scoped>
+.image {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.image img {
+  width: 100px;  /* Poți ajusta dimensiunea */
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.upload-avatar {
+  display: none;
+}
+
+
 .userOptions {
   width: 350px;
   height: 100%;
@@ -223,6 +258,12 @@ const onEditInfoClick = async () => {
   height: 20px;
   cursor: pointer;
   margin-left: 10px;
+}
+
+.upload-avatar {
+  margin-top: 10px;
+  display: block;
+  color: white;
 }
 
 </style>

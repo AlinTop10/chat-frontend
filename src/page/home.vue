@@ -160,8 +160,14 @@ const updateChats = async () => {
   }
 };
 
-// Poți apela asta din `chat.vue` prin emit
+// Poți apela asta din chat.vue prin emit
 const handleNewEvent = async ({ incomingChatId, userId }: { incomingChatId: number, userId: number }) => {
+  console.log({incomingChatId, userId});
+  if(!incomingChatId || !userId) {
+    console.error('Eroare: NU primeste chatId ori userId');
+    return;
+  }
+
   const index = chats.value.findIndex(chat => chat.id === incomingChatId);
   if (index > -1) {
     const chat = chats.value[index];

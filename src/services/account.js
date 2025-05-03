@@ -57,6 +57,31 @@ function getHttpClient(){
 
 }
 
+async function uploadAvatar(file){
+  
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const httpClient = getHttpClient();
+    
+  
+    try {
+        const response = await httpClient.post('users/upload-avatar', formData)
+      // Trimite fișierul la server
+      
+  
+      console.log("Răspuns server:", response.data);
+  
+    //   // Actualizează avatarul dacă a fost încărcat cu succes
+    //   if (user.value) {
+    //     user.value.avatar = data.avatarPath;  // Actualizează calea avatarului
+    //   }
+    } catch (error) {
+      console.error("Eroare la upload avatar:", error);
+    }
+};
+
 function redirectToLogin(){
     window.location.replace("#/log");
 }
@@ -106,5 +131,5 @@ async function updateAccount(data) {
   }
 
 export{login, auth, getAccount,getFriends, getChatMessages, 
-    acceptFriends, deliteFriends, getUsers, addChats, updateAccount};
+    acceptFriends, deliteFriends, getUsers, addChats, updateAccount, uploadAvatar};
 // sendMessageToChat

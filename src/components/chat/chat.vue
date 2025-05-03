@@ -145,7 +145,7 @@
 
       text.value = "";
 
-      emit("newMessageInAnotherChat", chatId, userId);
+      emit("newMessageInAnotherChat", { incomingChatId: chatId, userId });
   
       nextTick(() => {
         chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
