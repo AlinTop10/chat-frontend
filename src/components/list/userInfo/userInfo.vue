@@ -2,7 +2,9 @@
     <div class="userInfo">
         <div class="user">
             <!-- Afișează avatarul actualizat sau imaginea implicită -->
-            <img :src="user?.avatar ? `http://localhost:4000/downloads/${user.avatar}` : '/src/img/avatar2.webp'" alt="Avatar" />
+            <img :key="avatarKey" :src="avatarUrl || '/src/img/avatar2.webp'" @error="avatarUrl = '/src/img/avatar2.webp'" />
+
+
             <h2>{{ user?.name }}</h2>
         </div>
         <div class="icons">
@@ -10,15 +12,22 @@
             <img src="/src/img/edit.png" alt="" @click="toggleOption" />
             <UserMenu v-if="showMenu" @close="showMenu = false" />
         </div>
-        <UserOptions v-if="showOptions" @nameUpdated="updateUserName" @avatarUpdated="updateAvatar" @close="showOptions = false" />
+        <UserOptions
+            v-if="showOptions"
+            :key="userOptionsKey"
+            @nameUpdated="updateUserName"
+            @avatarUpdated="(val) => { updateAvatar(val); $emit('avatarUpdated'); }"
+            @close="closeUserOptions"
+        />
     </div>
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick  } from 'vue';
 import { getAccount } from '@/services/account';
 import UserOptions from '../addUser/userOptions.vue';
 import UserMenu from '../addUser/userMenu.vue';
+
 
 export default { 
     components: { UserOptions, UserMenu },
@@ -26,10 +35,17 @@ export default {
         const user = ref(null);
         const showOptions = ref(false);
         const showMenu = ref(false);
+        const avatarUrl = ref('');
+        const userOptionsKey = ref(0);
+        const avatarKey = ref(0); // 👉 cheie pentru re-render
 
         // Funcții pentru schimbarea numelui
         const toggleOption = () => {
             showOptions.value = !showOptions.value;
+        };
+
+        const closeUserOptions = () => {
+            showOptions.value = false;
         };
 
         const toggleMenu = () => {
@@ -44,9 +60,18 @@ export default {
 
         // Actualizează avatarul
         const updateAvatar = (newAvatar) => {
+
             if (user.value) {
-                user.value.avatar = newAvatar; // actualizează avatarul
+                user.value.avatar = newAvatar;
             }
+
+            avatarUrl.value = '';
+            nextTick(() => {
+                avatarUrl.value = `http://localhost:4000/downloads/${newAvatar}?t=${Date.now()}`;
+                avatarKey.value++;
+            });
+
+            userOptionsKey.value++;
         };
 
         // Încarcă informațiile utilizatorului la montare
@@ -54,6 +79,7 @@ export default {
             try {
                 const response = await getAccount();
                 user.value = response.data.user;
+                avatarUrl.value = `http://localhost:4000/downloads/${user.value.avatar}?t=${Date.now()}`;
             } catch (error) {
                 console.error("Eroare la obținerea datelor userului:", error);
             }
@@ -64,7 +90,7 @@ export default {
             console.log("Avatarul a fost actualizat:", newAvatar);
         });
 
-        return { user, showMenu, showOptions, toggleOption, updateUserName, toggleMenu, updateAvatar };
+        return { userOptionsKey, closeUserOptions, user, showMenu, showOptions, toggleOption, updateUserName, toggleMenu, avatarUrl, updateAvatar, avatarKey };
     }
 };
 </script>

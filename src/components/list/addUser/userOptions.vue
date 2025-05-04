@@ -11,7 +11,12 @@
 
     <div class="image" @click="openFileInput">
       <!-- Afișează avatarul sau imaginea implicită -->
-      <img :src="user?.avatar ? `http://localhost:4000/downloads/${user.avatar}` : '/src/img/avatar2.webp'" alt="Avatar" />
+      <img
+        :key="avatarKey"
+        :src="avatarUrl || '/src/img/avatar2.webp'"
+        @error="avatarUrl = '/src/img/avatar2.webp'"
+      />
+
       <input ref="fileInput" type="file" accept="image/*" @change="handleAvatarChange" class="upload-avatar" style="display:none" />
     </div>
 
@@ -43,10 +48,11 @@
         <input
           class="input"
           type="text"
-          :value="user?.info"
+          :value="user?.about"
           :readonly="!isEditingAbout"
           ref="infoInputRef"
-        />
+        />    
+
         <img
           class="edit-icon"
           :src="isEditingAbout ? '/src/img/check.png' : '/src/img/edit.png'"
@@ -63,11 +69,15 @@
 import { ref, onMounted, nextTick, defineEmits } from 'vue'
 import { getAccount, updateAccount, uploadAvatar } from '@/services/account'
 
-const user = ref<{ name: string; info: string, avatar: string } | null>(null)
+const user = ref<{ name: string; about: string, avatar: string } | null>(null)
 
 const isEditingName = ref(false)
 const isEditingAbout = ref(false)
 const newName = ref('');
+const avatarUrl = ref('');
+const avatarKey = ref(0);
+
+
 const emit = defineEmits(['close','nameUpdated', 'avatarUpdated']);
 
 const nameInputRef = ref<HTMLInputElement | null>(null)
@@ -77,6 +87,7 @@ onMounted(async () => {
   try {
     const response = await getAccount()
     user.value = response.data.user;
+    avatarUrl.value = `http://localhost:4000/downloads/${user.value.avatar}?t=${Date.now()}`;
   } catch (error) {
     console.log('Eroare la obținerea datelor userului:', error)
   }
@@ -109,9 +120,9 @@ const onEditInfoClick = async () => {
     infoInputRef.value?.focus()
   } else {
     const newAbout = infoInputRef.value?.value ?? ''
-    if (newAbout !== user.value?.info) {
-      await updateAccount({ about: newAbout }) // trimite DOAR about
-      user.value!.info = newAbout
+    if (newAbout !== user.value?.about) {
+      await updateAccount({ about: newAbout });
+      user.value!.about = newAbout;
     }
     isEditingAbout.value = false
   }
@@ -124,16 +135,28 @@ const openFileInput = () => {
 
 const handleAvatarChange = async (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0];
-  console.log(file);
-  if (!file) {
-    console.log("Nu a fost selectat niciun fișier.");
-    return;
+  if (!file) return;
+
+  try {
+    const response = await uploadAvatar(file);
+    const savedFilename = response.data.avatarPath.split("/").pop();
+
+    if (user.value) {
+      user.value.avatar = savedFilename;
+
+      // 🔁 Forțăm un ciclu complet pentru actualizarea imaginii
+      avatarUrl.value = ""; // 1. reset
+      await nextTick();     // 2. așteptăm refresh-ul DOM-ului
+      avatarUrl.value = `http://localhost:4000/downloads/${savedFilename}?t=${Date.now()}`; // 3. set nou
+      avatarKey.value++; // 👈 forțează re-render
+    }
+
+    emit('avatarUpdated', savedFilename);
+  } catch (error) {
+    console.error("Eroare la upload avatar:", error);
   }
-
-  await uploadAvatar(file);
-
-  emit('avatarUpdated', file.name);
 };
+
 </script>
 
 

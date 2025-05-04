@@ -2,7 +2,7 @@
   <div :class="[style.homeWrapper, style.homeFont]">
     <div :class="style.container">
       <div :class="style.list">
-        <userInfo />
+        <userInfo :key="userInfoKey" @avatarUpdated="onAvatarUpdated"/>
 
         <div :class="style.chatList">
           <div :class="style.search">
@@ -22,6 +22,11 @@
           </div>
 
           <div :class="style.chatItemsScroll">
+
+            <div v-if="filteredChats.length === 0 && activeFilter === 'unread'" :class="style.noChats">
+              Nu sunt chaturi cu mesaje necitite
+            </div>
+
             <div
               v-for="chat in filteredChats"
               :key="chat.id"
@@ -72,16 +77,17 @@ const activeFilter = ref("all");
 const curentChatId = ref<number | null>(0);
 const currentUserId = ref<number | null>(0);
 const unreadChatsCount  = ref(0);
-const forceShowChatId = ref<number | null>(null);
+const userInfoKey = ref(0);
+
+const onAvatarUpdated = () => {
+  userInfoKey.value++; // 👉 forțează re-randarea userInfo
+};
 
 
 const selectChat = async (selectedId: number) => {
-  const previousForceChatId = forceShowChatId.value;
 
   curentChatId.value = selectedId;
   chatId.value = selectedId;
-
-  forceShowChatId.value = selectedId; // o actualizăm cu noul chat
 
   const chat = chats.value.find(c => c.id === selectedId);
   if (chat) {
@@ -92,11 +98,6 @@ const selectChat = async (selectedId: number) => {
   }
 
   await markMessagesAsRead(selectedId);
-
-  // ✅ dacă s-a selectat un alt chat decât cel păstrat în necitite, îl eliminăm
-  if (previousForceChatId !== null && selectedId !== previousForceChatId) {
-    forceShowChatId.value = null;
-  }
 };
 
 
@@ -137,7 +138,7 @@ const filteredChats = computed(() => {
     }
 
     if (activeFilter.value === "unread") {
-      return (chat.unreadMessagesCount > 0 || chat.id === forceShowChatId.value);
+      return (chat.unreadMessagesCount > 0);
     }
 
     return nameMatches;
