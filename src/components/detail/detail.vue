@@ -1,10 +1,15 @@
 <template>
     <div className="detail">
-        <div className="user">
-            <img src="/src/img/avatar2.webp" alt="">
-            <h2 v-if="activeChat">{{ activeChat.friend.name }}</h2>
-            <p v-if="activeChat">{{ activeChat.friend.about ?? '...' }}</p>
+        <template v-if="activeChat">
+        <div class="user">
+            <img
+            :src="activeChat.friend?.avatar ? `http://localhost:4000/downloads/${activeChat.friend.avatar}` : '/src/img/avatar2.webp'"
+            alt="avatar"
+            />
+            <h2>{{ activeChat.friend.name }}</h2>
+            <p>{{ activeChat.friend.about ?? '...' }}</p>
         </div>
+
         <div class="info">
             <div class="option">
                 <div class="title">
@@ -43,6 +48,13 @@
             <button class="accept" v-if="activeChat && activeChat.status === 1" @click="acceptFriendRequest">Accept</button>
             <button v-if="activeChat" @click="deliteFriendRequest">Delete</button>
         </div>
+        </template>
+
+        <template v-else>
+        <div class="noChats">Niciun chat selectat</div>
+        </template>
+
+        
     </div>
 </template>
     
@@ -68,6 +80,7 @@ const props = defineProps<{
       id: number;
       name: string;
       about: string;
+      avatar: string;
     };
   }[];
 }>();
@@ -227,5 +240,16 @@ const deliteFriendRequest = async () => {
 
 .detail::-webkit-scrollbar, .chatList::-webkit-scrollbar {
     width: 5px; /* Grosimea scrollbar-ului */
+}
+.noChats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  color: #a5a5a5;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
 }
 </style>

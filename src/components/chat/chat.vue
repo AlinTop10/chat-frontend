@@ -2,7 +2,10 @@
     <div className="chat">
       <div className="top" v-if="activeChat">
         <div className="user">
-          <img src="/src/img/avatar2.webp" alt="">
+          <img
+              :src="activeChat.friend.avatar ? `http://localhost:4000/downloads/${activeChat.friend.avatar}` : '/src/img/avatar2.webp'"
+              alt="avatar"
+            />
           <div className="texts">
             <span>{{ activeChat.friend.name }}</span>
             <p>{{ activeChat.friend.about }}</p>
@@ -22,7 +25,8 @@
             :key="message.id"
             :class="['message', { own: message.userId === currentUserId?.id }]"
           >
-            <img v-if="message.userId !== currentUserId?.id" src="/src/img/avatar2.webp" alt="" />
+            <img v-if="message.userId !== currentUserId?.id" :src="activeChat.friend.avatar ? `http://localhost:4000/downloads/${activeChat.friend.avatar}` : '/src/img/avatar2.webp'"
+            alt="avatar"/>
             <div class="texts">
               <p>{{ message.text }}</p>
               <span>{{ formatDate(message.timestamp) }}</span>
@@ -69,7 +73,8 @@
       friend: {
         id: number;
         name: string;
-        about: string
+        about: string;
+        avatar: string;
       };
     }[];
   }>();

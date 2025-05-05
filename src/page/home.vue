@@ -2,7 +2,9 @@
   <div :class="[style.homeWrapper, style.homeFont]">
     <div :class="style.container">
       <div :class="style.list">
-        <userInfo :key="userInfoKey" @avatarUpdated="onAvatarUpdated"/>
+        <userInfo :key="userInfoKey" @avatarUpdated="onAvatarUpdated"
+        @showOptions="showUserOptions = true" 
+        @hideOptions="showUserOptions = false"/>
 
         <div :class="style.chatList">
           <div :class="style.search">
@@ -33,7 +35,11 @@
               :class="style.item"
               @click="selectChat(chat.id)"
             >
-              <img src="/src/img/avatar2.webp" alt="">
+            <img
+              :src="chat.friend.avatar ? `http://localhost:4000/downloads/${chat.friend.avatar}` : '/src/img/avatar2.webp'"
+              alt="avatar"
+            />
+
               <div :class="style.texts">
                 <div :class="style['chat-info']">
                   <span>{{ chat.friend.name }}</span>
@@ -55,6 +61,13 @@
       <detail :chatId="chatId" :chats="chats" @updateChats="updateChats" />
     </div>
   </div>
+  
+  <div
+    v-if="showUserOptions"
+    class="global-overlay"
+    @click.stop
+  ></div>
+
 </template>
 
 
@@ -78,9 +91,11 @@ const curentChatId = ref<number | null>(0);
 const currentUserId = ref<number | null>(0);
 const unreadChatsCount  = ref(0);
 const userInfoKey = ref(0);
+const showUserOptions = ref(false);
+
 
 const onAvatarUpdated = () => {
-  userInfoKey.value++; // 👉 forțează re-randarea userInfo
+  userInfoKey.value++; 
 };
 
 

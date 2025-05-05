@@ -37,7 +37,7 @@ export default {
         const showMenu = ref(false);
         const avatarUrl = ref('');
         const userOptionsKey = ref(0);
-        const avatarKey = ref(0); // 👉 cheie pentru re-render
+        const avatarKey = ref(0); 
 
         // Funcții pentru schimbarea numelui
         const toggleOption = () => {
