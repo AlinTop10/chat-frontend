@@ -177,8 +177,8 @@ const updateChats = async () => {
 };
 
 // Poți apela asta din chat.vue prin emit
-const handleNewEvent = async ({ incomingChatId, userId }: { incomingChatId: number, userId: number }) => {
-  console.log({incomingChatId, userId});
+const handleNewEvent = async ({ incomingChatId, userId, message }: { incomingChatId: number, userId: number, message: string }) => {
+
   if(!incomingChatId || !userId) {
     console.error('Eroare: NU primeste chatId ori userId');
     return;
@@ -187,6 +187,8 @@ const handleNewEvent = async ({ incomingChatId, userId }: { incomingChatId: numb
   const index = chats.value.findIndex(chat => chat.id === incomingChatId);
   if (index > -1) {
     const chat = chats.value[index];
+
+    chat.msg = message;
 
     const isFromOtherUser = userId !== currentUserId.value;
     const isNotInCurrentChat = chatId.value !== incomingChatId;

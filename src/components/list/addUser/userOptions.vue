@@ -48,7 +48,7 @@
         <input
           class="input"
           type="text"
-          :value="user?.about"
+          :value="user?.about || '...'"
           :readonly="!isEditingAbout"
           ref="infoInputRef"
         />    

@@ -150,7 +150,7 @@
 
       text.value = "";
 
-      emit("newMessageInAnotherChat", { incomingChatId: chatId, userId });
+      emit("newMessageInAnotherChat", { incomingChatId: chatId, userId, message: message });
   
       nextTick(() => {
         chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
@@ -191,7 +191,7 @@
  
 
   socket.on("chatLive", ({ chatId: incomingChatId, message, userId }) => {
-    emit("newMessageInAnotherChat", {incomingChatId, userId});
+    emit("newMessageInAnotherChat", {incomingChatId, message,userId});
   });
 
   socket.on("privateMessage", async ({ chatId: incomingChatId, message, userId }) => {

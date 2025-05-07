@@ -9,7 +9,11 @@
         <div class="user-list">
             <div class="user" v-for="item in searchHandler" :key="item.id">
                 <div class="detail">
-                    <img src="/src/img/avatar2.webp" alt="">
+                    <img
+                        :src="item?.avatar ? `http://localhost:4000/downloads/${item.avatar}` : '/src/img/avatar2.webp'"
+                        alt="avatar"
+                        @error="e => e.target.src = '/src/img/avatar2.webp'"
+                    />
                     <span>{{ item.name }}</span>
                 </div>
                 <button @click="createChats(item.id)">Add User</button>
