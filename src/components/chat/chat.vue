@@ -28,7 +28,13 @@
             <img v-if="message.userId !== currentUserId?.id" :src="activeChat.friend.avatar ? `http://localhost:4000/downloads/${activeChat.friend.avatar}` : '/src/img/avatar2.webp'"
             alt="avatar"/>
             <div class="texts">
-              <p>{{ message.text }}</p>
+
+              <p v-if="message.typeMsg !== 'image'">{{ message.text }}</p>
+              <img
+                v-else
+                :src="`http://localhost:4000/downloads/${message.text}`"
+                class="image-preview"
+              />
               <span>{{ formatDate(message.timestamp) }}</span>
             </div>
           </div>
@@ -40,7 +46,8 @@
   
       <div className="bottom" v-if="activeChat">
         <div class="icons">
-          <img src="/src/img/img.png" alt="">
+          <input ref="imageInput" type="file" accept="image/*" @change="handleImageUpload" style="display: none" />
+          <img src="/src/img/img.png" alt="" @click="triggerImageInput" />
           <img src="/src/img/camera.png" alt="">
           <img src="/src/img/mic.png" alt="">
         </div>
@@ -81,7 +88,7 @@
   
   const emit = defineEmits(['newMessageInAnotherChat']);//new message in this chat
   
-  const messages = ref<{ id: number; text: string; userId: number; timestamp: string }[]>([]);
+  const messages = ref<{ id: number; text: string; userId: number; timestamp: string; typeMsg: string }[]>([]);
   const open = ref(false);
   const text = ref("");
   const chatContainer = ref<HTMLElement | null>(null);
@@ -89,7 +96,41 @@
   const page = ref(1);
   const isLoading = ref(false);
   const hasMoreMessages = ref(true);
+  const imageInput = ref<HTMLInputElement | null>(null);
   
+  const triggerImageInput = () => {
+  imageInput.value?.click();
+  };
+
+  const handleImageUpload = async (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file || !props.chatId || !currentUserId.value) return;
+
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("chatId", props.chatId.toString());
+  formData.append("userId", currentUserId.value.id.toString());
+
+  try {
+    const response = await fetch("http://localhost:4000/chats/upload-image", {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+
+    messages.value.push({
+      id: result.message.chatMessageId,
+      text: result.message.message,
+      userId: currentUserId.value.id,
+      timestamp: result.message.createdAt,
+      typeMsg: "image"
+    });
+  } catch (err) {
+    console.error("Eroare la trimiterea imaginii:", err);
+  }
+};
+
   onMounted(async () => {
     const response = await getAccount();
     currentUserId.value = response.data.user;
@@ -105,6 +146,7 @@
         text: msg.message,
         userId: msg.User.userId,
         timestamp: msg.createdAt,
+        typeMsg: msg.typeMsg || "message"
       }));
   
       if (newMessages.length === 0) {
@@ -146,6 +188,7 @@
         text: message,
         userId,
         timestamp: new Date().toISOString(),
+        typeMsg: "message"
       });
 
       text.value = "";
@@ -194,8 +237,8 @@
     emit("newMessageInAnotherChat", {incomingChatId, message,userId});
   });
 
-  socket.on("privateMessage", async ({ chatId: incomingChatId, message, userId }) => {
-  console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId });
+  socket.on("privateMessage", async ({ chatId: incomingChatId, message, userId, typeMsg }) => {
+  console.log("Mesaj primit prin WebSocket:", { incomingChatId, message, userId, typeMsg });
 
   if (userId === currentUserId.value?.id) {
     
@@ -211,6 +254,7 @@
       text: message,
       userId,
       timestamp: new Date().toISOString(),
+      typeMsg: typeMsg || "message"
     });
 
     nextTick(() => {

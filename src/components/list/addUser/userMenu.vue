@@ -2,7 +2,7 @@
     <div class="userMenu">
       <ul>
         <li>Grupă nouă</li>
-        <li>Ieșire</li>
+        <li @click="handleLogout">Ieșire</li>
       </ul>
     </div>
   </template>
@@ -10,7 +10,17 @@
   <script >
     export default{
       setup(){
-        
+        const handleLogout = () => {
+          
+          localStorage.removeItem("token");
+          window.location.reload();
+         
+          // window.location.href = "/#/log"; 
+        };
+
+        return {
+          handleLogout
+        }
       }
     }
   </script>
