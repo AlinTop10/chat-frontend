@@ -127,6 +127,10 @@
       timestamp: result.message.createdAt,
       typeMsg: "image"
     });
+
+    nextTick(() => {
+        chatContainer.value?.scrollTo({ top: chatContainer.value.scrollHeight, behavior: "smooth" });
+      });
   } catch (err) {
     console.error("Eroare la trimiterea imaginii:", err);
   }
@@ -180,18 +184,18 @@
     const userId = currentUserId.value.id;
     const chatId = props.chatId;
   
-    
-      // Emit către serverul WebSocket
-      socket.emit("privateMessage", { message, userId, chatId });
   
-      // messages.value.push({
-      //   id: Date.now(),
-      //   text: message,
-      //   userId,
-      //   timestamp: new Date().toISOString(),
-      //   typeMsg: "message"
-      // });
+  
+      messages.value.push({
+        id: Date.now(),
+        text: message,
+        userId,
+        timestamp: new Date().toISOString(),
+        typeMsg: 'text'
+      });
 
+       // Emit către serverul WebSocket
+      socket.emit("privateMessage", { message, userId, chatId });
       text.value = "";
 
       emit("newMessageInAnotherChat", { incomingChatId: chatId, userId, message: message });
@@ -248,14 +252,14 @@
   const isCurrentChat = props.chatId === incomingChatId;
 
   if (!isCurrentChat) {
-    emit("newMessageInAnotherChat", incomingChatId, userId);
+    emit("newMessageInAnotherChat", incomingChatId, userId, typeMsg);
   } else {
     messages.value.push({
       id: Date.now(),
       text: message,
       userId,
       timestamp: new Date().toISOString(),
-      typeMsg
+      typeMsg: typeMsg
     });
 
     nextTick(() => {
