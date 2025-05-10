@@ -29,12 +29,13 @@
             alt="avatar"/>
             <div class="texts">
 
-              <p v-if="message.typeMsg !== 'image'">{{ message.text }}</p>
+              <p v-if="message.typeMsg === 'text'">{{ message.text }}</p>
               <img
-                v-else
+                v-if="message.typeMsg === 'image'"
                 :src="`http://localhost:4000/downloads/${message.text}`"
                 class="image-preview"
               />
+
               <span>{{ formatDate(message.timestamp) }}</span>
             </div>
           </div>
@@ -146,7 +147,7 @@
         text: msg.message,
         userId: msg.User.userId,
         timestamp: msg.createdAt,
-        typeMsg: msg.typeMsg || "message"
+        typeMsg: msg.typeMsg 
       }));
   
       if (newMessages.length === 0) {
@@ -183,13 +184,13 @@
       // Emit către serverul WebSocket
       socket.emit("privateMessage", { message, userId, chatId });
   
-      messages.value.push({
-        id: Date.now(),
-        text: message,
-        userId,
-        timestamp: new Date().toISOString(),
-        typeMsg: "message"
-      });
+      // messages.value.push({
+      //   id: Date.now(),
+      //   text: message,
+      //   userId,
+      //   timestamp: new Date().toISOString(),
+      //   typeMsg: "message"
+      // });
 
       text.value = "";
 
@@ -254,7 +255,7 @@
       text: message,
       userId,
       timestamp: new Date().toISOString(),
-      typeMsg: typeMsg || "message"
+      typeMsg
     });
 
     nextTick(() => {
