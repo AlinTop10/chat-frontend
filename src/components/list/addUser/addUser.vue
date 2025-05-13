@@ -2,7 +2,6 @@
     <div class="addUser">
         <form @submit.prevent="searchUser">
             <input type="text" v-model="search" placeholder="Username" name="username"/>
-            <button>Search</button>
         </form>
 
         <!-- Container scroll pentru utilizatori -->
@@ -73,6 +72,7 @@ export default {
 
                 // Adaugă noul user în lista de chat-uri existente
                 this.chaturiExistente.push(friendId);
+                this.$emit("chatCreated");
             } catch (error) {
                 console.error("Eroare la crearea chatului:", error);
             }
@@ -81,7 +81,9 @@ export default {
 };
 </script>
 
-   
+   <!-- .upload-avatar {
+    display: none;
+} -->
 <style scoped>
 .addUser {
     width: 500px; 
@@ -143,12 +145,9 @@ button {
 
 form {
     display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 79px
-}
-
-form button{
-    padding: 10px 20px; 
-    font-size: 16px;
 }
 
 form input {
@@ -157,5 +156,6 @@ form input {
     border-radius: 10px; 
     border: 1px solid rgba(255, 255, 255, 0.2); 
     outline: none;
+    width: 300px;
 }
 </style>

@@ -182,20 +182,21 @@ const handleAvatarChange = async (e: Event) => {
 
 
 .userOptions {
-  width: 350px;
-  height: 100%;
-  padding: 30px 0;
-  background-color: rgba(17, 25, 40, 0.781); /* ca în addUser.vue */
+  width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: rgba(17, 25, 40, 0.95);
   border-radius: 10px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
+  padding: 30px 20px;
+  position: fixed; /* centru absolut */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
   display: flex;
   flex-direction: column;
 }
+
 
 .content {
   color: white;
@@ -288,5 +289,6 @@ const handleAvatarChange = async (e: Event) => {
   display: block;
   color: white;
 }
+
 
 </style>
