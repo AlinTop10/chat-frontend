@@ -3,6 +3,7 @@
     <input type="password" @input="getPassw($event.target.value)"  name="password" placeholder="Password" required>
     <input type="password" @input="getPasswConf($event.target.value)" name="confirm_password" placeholder="Confirm_password" required>
     <input type="text" @input="getName($event.target.value)" name="name" placeholder="Name" required>
+    <input type="text" @input="getUserName($event.target.value)" name="userName" placeholder="UserName (ex: @ion)" required>
    </template>
    
    <script>
@@ -23,7 +24,12 @@
            getName: {
                type: Function,
                required: true
-           }
+           },
+           getUserName: {
+                type: Function,
+                required: true
+            }
+
        }
    }
    </script>

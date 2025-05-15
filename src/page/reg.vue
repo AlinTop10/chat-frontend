@@ -4,7 +4,7 @@
     <div class="register-container"> 
             <h1>Register to Denchat</h1>
             <div className="form-group">
-                <InputForAuth :getEmail="getEmail" :getPassw="getPassw" :getPasswConf="getPasswConf" :getName="getName"/>
+                <InputForAuth :getEmail="getEmail" :getPassw="getPassw" :getPasswConf="getPasswConf" :getName="getName" :getUserName="getUserName"/>
                 <button type="submit" @click="checkRegistration">Register</button>
             </div>
         </div>
@@ -22,7 +22,8 @@ export default{
             email: "", 
             password: "",
             confirm_password: "",
-            name: ""
+            name: "",
+            userName: ""
         }
     },
     methods: {
@@ -38,21 +39,31 @@ export default{
         getName(val){
             this.name = val;
         },
+          getUserName(val) {
+            this.userName = val;
+        },
+
         async checkRegistration() {
             if(!this.email || !this.password 
-            || !this.confirm_password || !this.name){
-                alert("Please enter both email and password!");
+            || !this.confirm_password || !this.name || !this.userName){
+                alert("Completează toate câmpurile!");
                 return;
             }
             console.log(this.email, this.password, this.confirm_password, this.name);
+            
+                if (!this.userName.startsWith("@")) {
+                alert("userName-ul trebuie să înceapă cu '@'!");
+                return;
+                }
+            
             try{
-                const response = await auth(this.email, this.password, this.confirm_password, this.name);
-                console.log("Registration was successful:", response.data);
-                alert("Registration was successful!");
+                const response = await auth(this.email, this.password, this.confirm_password, this.name, this.userName);
+                console.log("Înregistrare cu succes: ", response.data);
+                alert("Înregistrare cu succes!");
                 this.$router.push('/log');
             } catch(error) {
                 console.log(error);
-                alert("Invalid credentials!");
+                alert("Eroare la înregistrare!");
             }
         }
     }

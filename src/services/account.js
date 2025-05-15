@@ -11,12 +11,13 @@ async function login(email, password) {
     });
 }
 
-async function  auth(email, password, confirm_password, name) {
+async function  auth(email, password, confirm_password, name, userName) {
     return axios.post('http://localhost:4000/auth/reg',{
         email, 
         password,
         confirm_password,
-        name    
+        name,
+        userName    
     },{
         headers: {
             "Access-Control-Allow-Origin": "*",
