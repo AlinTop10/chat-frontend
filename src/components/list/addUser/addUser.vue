@@ -1,7 +1,7 @@
 <template>
     <div class="addUser">
         <form @submit.prevent="searchUser">
-            <input type="text" v-model="search" placeholder="Username" name="username"/>
+            <input type="text" v-model="search" placeholder="Username (ex: @ion)" name="username"/>
         </form>
 
         <!-- Container scroll pentru utilizatori -->
@@ -53,7 +53,7 @@ export default {
             return this.users
                 .filter(user => user.id !== this.currentUserId && 
                     !this.chaturiExistente.includes(user.id) &&
-                    user.name.toLowerCase().includes(this.search.toLowerCase())
+                    user.userName.toLowerCase().includes(this.search.toLowerCase())
                 )
                 .slice(0, 5); // Limităm lista la 5 rezultate
         }
