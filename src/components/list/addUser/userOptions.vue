@@ -40,7 +40,29 @@
       </div>
     </div>
 
-    <label class="label tip">Acest nume va fi vizibil pentru persoanele dvs. de contact.</label>
+    <label class="label tip">Folosind acest nume, ceilalți utilizatori vă pot găsi și iniția o conversație cu dumneavoastră.</label>
+
+    <div class="info-user second">
+      <label class="label">User name</label>
+      <div class="input-wrapper">
+        <input
+          class="input"
+          type="text"
+          :value="user?.userName || ''"
+          :readonly="!isEditingUserName"
+          ref="userNameInputRef"
+        />
+        <img
+          class="edit-icon"
+          :src="isEditingUserName ? '/src/img/check.png' : '/src/img/edit.png'"
+          alt="edit"
+          @click="onEditUserNameClick"
+        />
+      </div>
+    </div>
+
+
+    
 
     <div class="info-user second">
       <label class="label">Despre</label>
@@ -69,10 +91,11 @@
 import { ref, onMounted, nextTick, defineEmits } from 'vue'
 import { getAccount, updateAccount, uploadAvatar } from '@/services/account'
 
-const user = ref<{ name: string; about: string, avatar: string } | null>(null)
+const user = ref<{ name: string; about: string, avatar: string, userName: string } | null>(null)
 
-const isEditingName = ref(false)
-const isEditingAbout = ref(false)
+const isEditingName = ref(false);
+const isEditingAbout = ref(false);
+const isEditingUserName = ref(false);
 const newName = ref('');
 const avatarUrl = ref('');
 const avatarKey = ref(0);
@@ -82,6 +105,7 @@ const emit = defineEmits(['close','nameUpdated', 'avatarUpdated']);
 
 const nameInputRef = ref<HTMLInputElement | null>(null)
 const infoInputRef = ref<HTMLInputElement | null>(null)
+const userNameInputRef = ref<HTMLInputElement | null>(null);
 
 onMounted(async () => {
   try {
@@ -108,6 +132,33 @@ const onEditNameClick = async () => {
     isEditingName.value = false
   }
 }
+
+const onEditUserNameClick = async () => {
+  if (!isEditingUserName.value) {
+    isEditingUserName.value = true;
+    await nextTick();
+    userNameInputRef.value?.focus();
+  } else {
+    const newUserName = userNameInputRef.value?.value.trim() || '';
+    if (!newUserName.startsWith('@')) {
+      alert("userName trebuie să înceapă cu '@'");
+      return;
+    }
+
+    if (newUserName !== user.value?.userName) {
+      try {
+        await updateAccount({ userName: newUserName });
+        user.value!.userName = newUserName;
+        alert('userName actualizat');
+      } catch (err) {
+        console.error("Eroare la actualizarea userName:", err);
+        alert("userName deja folosit sau invalid");
+      }
+    }
+    isEditingUserName.value = false;
+  }
+}
+
 
 const saveChanges = () => {
   emit('nameUpdated', newName.value);
@@ -170,7 +221,7 @@ const handleAvatarChange = async (e: Event) => {
 }
 
 .image img {
-  width: 100px;  /* Poți ajusta dimensiunea */
+  width: 100px;
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
@@ -180,15 +231,14 @@ const handleAvatarChange = async (e: Event) => {
   display: none;
 }
 
-
 .userOptions {
   width: 400px;
   max-height: 90vh;
   overflow-y: auto;
   background-color: rgba(17, 25, 40, 0.95);
   border-radius: 10px;
-  padding: 30px 20px;
-  position: fixed; /* centru absolut */
+  padding: 20px 15px;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -197,71 +247,71 @@ const handleAvatarChange = async (e: Event) => {
   flex-direction: column;
 }
 
-
 .content {
   color: white;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
 .image img {
-  width: 200px;         
+  width: 200px;
   height: 200px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
-  margin: 0 auto;       
+  margin: 0 auto;
 }
 
 .image {
-  margin-top: 20px;
+  margin-top: 15px;
   display: flex;
   justify-content: center;
 }
 
 .exit {
-  background-color: #032a42; 
-  padding: 15px 20px;
+  background-color: #032a42;
+  padding: 10px 15px;
   display: flex;
   align-items: center;
-  gap: 10px; 
-  margin-top: -30px;
+  gap: 10px;
+  margin-top: -20px;
 }
 
 .title {
   color: #9e9e9e;
-  font-size: 20px;
+  font-size: 18px;
   margin: 0;
 }
 
 .info-user {
-  background-color: #032a42; 
-  padding: 15px 20px;
+  background-color: #032a42;
+  padding: 10px 15px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-top: 30px;
+  gap: 4px;
+  margin-top: 20px;
   box-sizing: border-box;
 }
 
 .label {
-  font-size: 15px;
-  color: #9e9e9e; 
+  font-size: 13px;
+  color: #9e9e9e;
 }
 
 .input {
-  font-size: 18px;
+  font-size: 15px;
   color: white;
   background: transparent;
   border: none;
   outline: none;
+  padding: 6px 0;
 }
 
 .tip {
-  margin-top: 10px;
-  padding: 0 20px;
-  font-size: 13px;
+  margin-top: 8px;
+  padding: 0 15px;
+  font-size: 12px;
   color: #9e9e9e;
 }
 
@@ -278,10 +328,10 @@ const handleAvatarChange = async (e: Event) => {
 }
 
 .edit-icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
 .upload-avatar {
@@ -289,6 +339,4 @@ const handleAvatarChange = async (e: Event) => {
   display: block;
   color: white;
 }
-
-
 </style>

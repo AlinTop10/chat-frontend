@@ -43,13 +43,22 @@
                 alt="avatar"
               />
               <div :class="style.texts">
+                
                 <div :class="style['chat-info']">
                   <span>{{ chat.friend.name }}</span>
                   <div v-if="chat.unreadMessagesCount > 0" :class="style.unread_badge">
                     {{ chat.unreadMessagesCount }}
                   </div>
                 </div>
-                <p>{{ modifyTheLastMessage(chat.msg, 7) }}</p>
+
+                <p v-if="modifyTheLastMessage(chat.msg, 7) !== 'poza::icon'">
+                  {{ modifyTheLastMessage(chat.msg, 7) }}
+                </p>
+                <div v-else style="display: flex; align-items: center; gap: 5px;">
+                  <img src="/src/img/img.png" alt="img" style="width: 16px; height: 16px;" />
+                  <span>poza</span>
+                </div>
+
               </div>
             </div>
           </div>
@@ -144,8 +153,17 @@ onMounted(async () => {
 
 const modifyTheLastMessage = (msg: string, maxNum: number) => {
   if (!msg) return null;
+
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  const isImage = imageExtensions.some(ext => msg.toLowerCase().endsWith(ext));
+
+  if (isImage) {
+    return 'poza::icon'; // marker special pentru randare personalizată
+  }
+
   return msg.length > maxNum ? msg.substring(0, maxNum).concat("...") : msg;
 };
+
 
 const filteredChats = computed(() => {
   return chats.value.filter(chat => {

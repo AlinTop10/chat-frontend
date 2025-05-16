@@ -61,9 +61,15 @@ export default{
                 console.log("Înregistrare cu succes: ", response.data);
                 alert("Înregistrare cu succes!");
                 this.$router.push('/log');
-            } catch(error) {
-                console.log(error);
-                alert("Eroare la înregistrare!");
+            } catch (error) {
+                if (error.response?.data?.errors) {
+                    const messages = error.response.data.errors.map(e => e.msg).join("\n");
+                    alert("Eroare de validare:\n" + messages);
+                } else if (error.response?.data?.message) {
+                    alert("Eroare:\n" + error.response.data.message);
+                } else {
+                    alert("Eroare necunoscută la înregistrare.");
+                }
             }
         }
     }
