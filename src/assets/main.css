@@ -336,15 +336,20 @@ header nav ul li.btn a:hover{
     height: 200px;
 }
 
-.feedback form button{
+.feedback form button {
     background: #DC7000;
     border-radius: 5px;
     border: 0;
-    float: right;
-    cursor: #fff;
-    padding: 15px 35px;
+    cursor: pointer;
+    padding: 15px 90px;
     transition: all 500ms ease;
+
+    display: block;
+    margin: 0 auto; /* ⬅️ Centrează butonul în formular */
+    text-align: center;
+    font-size: 18px;
 }
+
 
 .feedback form button:hover{
     background: rgb(195, 32, 32);
